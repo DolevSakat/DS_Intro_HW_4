@@ -1,0 +1,99 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
+with open('c:/simulation/dests.txt') as c:
+    list1 = []
+    for line in c:
+        for word in line.split():
+            list1.append(word)
+print(list1)
+
+
+# In[2]:
+
+
+url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=jerusalem&destinations=" +"|" .join(list1) + "&key=" 
+
+
+
+# In[3]:
+
+
+import requests
+
+
+# In[4]:
+
+
+response = requests.get(url)
+x = response.json()
+
+
+# In[5]:
+
+
+for i in range(len(list1)):
+    time = str(round(x['rows'][0]['elements'][i]['duration']['value']/60))
+    distance =  x['rows'][0]['elements'][i]['distance']['text']
+    print(list1[i] + " distance: " + distance + "; duration: " + time + " mins")
+
+
+# In[6]:
+
+
+url1 = "https://maps.googleapis.com/maps/api/geocode/json?address=" + "|" .join(list1) + "&key=" #put your key here
+
+
+# In[7]:
+
+
+response1 = requests.get(url1)
+x1 = response1.json()
+
+
+# In[8]:
+
+
+for i in range(len(list1)):
+    long = str(x1['results'][i]['geometry']['location'])
+    print(list1[i] + long)
+
+
+# In[9]:
+
+
+tup = dict()
+for i in range(len(list1)):
+    x2 = x['rows'][0]['elements'][i]['distance']['text']
+    t1 = str(x['rows'][0]['elements'][i]['duration']['text'])
+    long1 = x1['results'][i]['geometry']['location']['lat']
+    long2 = x1['results'][i]['geometry']['location']['lng']
+    data = (x2,t1,long1,long2)
+    tup[list1[i]] = data
+
+
+# In[10]:
+
+
+for i in tup:
+    print(i , "\n distance from Jerusalem:" , tup[i][0], "\n travel time:", tup[i][1], "\n location:", tup[i][2], tup[i][3])
+
+
+# In[11]:
+
+
+r = []
+for i in list1:
+    r.append(int(tup[i][0].replace(",","").replace("km","")))
+r.sort(reverse=True)
+for i in range(3):
+    for k,v in tup.items():
+        urg = int(v[0].replace(",","").replace("km",""))
+        if urg==r[i]: 
+            print(k , r[i] , "km form Jerusalem")
+
+
+# In[ ]:
